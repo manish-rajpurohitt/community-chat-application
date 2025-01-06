@@ -1,5 +1,5 @@
 from starlette.websockets import WebSocket, WebSocketDisconnect
-
+import json
 class SocketManager:
     def __init__(self):
         self.connections = {}
@@ -9,7 +9,9 @@ class SocketManager:
         await socket.accept()
         self.connections[client_id] = socket
         for id in self.connections.keys():
-            await self.connections[id].send_text(f"#{client_id} joined the chat!")
+            message_obj = {"client_id": client_id, "message": "Joined the chat"}
+            message_json = json.dumps(message_obj)
+            await self.connections[id].send_text(message_json)
         print("Sent Connected Message...")
         
         try:
@@ -35,12 +37,20 @@ class SocketManager:
                 del self.connections[client_id]
             
             for id in self.connections.keys():
-                await self.connections[id].send_text(f"#{client_id} left the chat!")
+                message_obj = {"client_id": client_id, "message": "Left the chat"}
+                message_json = json.dumps(message_obj)
+                await self.connections[id].send_text(message_json)
     
     async def send_private(self, to_client_id: str, message):
         if to_client_id in self.connections:
             await self.connections[to_client_id].send_text(message)
     
     async def send_community_message(self, client_id: str, text: str):
+        message_obj = {"client_id": client_id, "message": text}
+        message_json = json.dumps(message_obj)
+        
         for id in self.connections.keys():
-            await self.connections[id].send_text(f"#{client_id} : {text}")
+            await self.connections[id].send_text(message_json)
+
+    async def get_all_users(self):
+        return list(self.connections.keys())

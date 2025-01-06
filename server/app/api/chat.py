@@ -24,3 +24,8 @@ async def chat(websocket: WebSocket, client_id: str):
         await socketmanager.send_community_message(client_id)
     except WebSocketDisconnect:
         await socketmanager.disconnect(client_id)
+
+@router.get("/getAllUsers")
+async def get_all_users():
+        data = { "users": await socketmanager.get_all_users()}
+        return data

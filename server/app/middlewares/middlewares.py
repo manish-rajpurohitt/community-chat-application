@@ -7,7 +7,7 @@ ALGORITHM = "HS256"
 
 class TokenVerificationMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        if request.url.path.startswith("/client"):
+        if request.url.path.startswith("/chat"):
             return await call_next(request)
         if request.url.path.startswith("/auth"):
             return await call_next(request)
