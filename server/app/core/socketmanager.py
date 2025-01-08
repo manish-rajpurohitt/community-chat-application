@@ -46,6 +46,7 @@ class SocketManager:
             await self.connections[to_client_id].send_text(message)
     
     async def send_community_message(self, client_id: str, text: str):
+        print(text)
         message_obj = {"client_id": client_id, "message": text}
         message_json = json.dumps(message_obj)
         

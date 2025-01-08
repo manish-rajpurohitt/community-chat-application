@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { TextField, Button, Box, Typography, Paper, Avatar } from "@mui/material";
-import { getAllActivUsers } from "../services/api";
+import { getAIText, getAllActivUsers } from "../services/api";
+import InputAdornment from "@mui/material/InputAdornment";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
+import SmartToyIcon from "@mui/icons-material/SmartToy";
 
+import toast from "react-hot-toast";
+import Loader from "./Loader";
 const Chat = () => {
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
@@ -10,6 +16,8 @@ const Chat = () => {
     const [showUsername, setShowUsername] = useState(false);
     const messagesEndRef = useRef(null);
     const [activeMembers, setActiveMembers] = useState([]);
+    const [color, setColor] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         let socketConn;
@@ -46,6 +54,8 @@ const Chat = () => {
                 window.removeEventListener("beforeunload", handleBeforeUnload);
             };
         }
+
+        setColor(getRandomColor());
     }, [showUsername, username]);
 
     useEffect(() => {
@@ -59,8 +69,7 @@ const Chat = () => {
 
     const sendMessage = () => {
         if (socket && message) {
-            const payload = JSON.stringify({ client_id: username, message });
-            socket.send(payload);
+            socket.send(message);
             setMessage("");
         }
     };
@@ -90,7 +99,19 @@ const Chat = () => {
         if (!string) return "";
         return string.charAt(0).toUpperCase();
     };
+    const handleAIButtonClick = async () => {
+        let splittedText = message.split(" ");
 
+        if (splittedText.length > 5) {
+            setIsLoading(true);
+            let res = await getAIText(message);
+            setMessage(res.data?.response)
+            setIsLoading(false);
+
+        } else {
+            toast.error("Please add atleast 5 words to the message");
+        }
+    };
     return (
         <div
             style={{
@@ -101,6 +122,7 @@ const Chat = () => {
                 alignItems: "center",
             }}
         >
+            {isLoading ? <Loader /> : <></>}
             <Typography variant="h4" align="center" gutterBottom>
                 Welcome to Community Chat.
             </Typography>
@@ -130,7 +152,7 @@ const Chat = () => {
                                 <div key={member} style={{ padding: "2%", display: "flex", alignItems: "center", width: "100%", justifyContent: "start" }}>
                                     <Avatar
                                         sx={{
-                                            bgcolor: () => getRandomColor(),
+                                            bgcolor: color,
                                             width: 40,
                                             height: 40,
                                             fontSize: "1.5rem",
@@ -183,6 +205,17 @@ const Chat = () => {
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 placeholder="Type a message"
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <Tooltip title="Enhance with AI">
+                                                <IconButton onClick={handleAIButtonClick} >
+                                                    <SmartToyIcon />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </InputAdornment>
+                                    ),
+                                }}
                             />
                             <Button
                                 variant="contained"

@@ -6,11 +6,14 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Chat from "./components/Chat";
 import Navbar from "./components/Navbar";
+import toast, { Toaster } from 'react-hot-toast';
+
 
 function App() {
   return (
     <div >
       <Navbar />
+      <Toaster />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />

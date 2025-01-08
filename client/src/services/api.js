@@ -18,3 +18,13 @@ export const getAllActivUsers = async () => {
     const response = await axios.get(`${API_URL}/chat/getAllUsers`);
     return response;
 };
+
+
+export const getAIText = async (message) => {
+    const response = await axios.post(`${API_URL}/chat/enhanceText`, {
+        "prompt": message,
+        "max_tokens": 200,
+        "temperature": 0.7
+    });
+    return response;
+};
